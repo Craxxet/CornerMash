@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cornerstone Matchmaker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <main class="app">
+    <header class="hero">
+      <h1>Cornerstone Matchmaker</h1>
+      <p class="subtitle">Which annual cornerstone would you pick?</p>
+    </header>
+
+    <section class="matchup" id="matchup">
+      <button class="cs-card" id="cs-a" type="button">
+        <div class="cs-image-wrap">
+          <img id="cs-a-img" alt="" />
+        </div>
+        <div class="cs-info">
+          <span class="cs-rarity" id="cs-a-rarity"></span>
+          <h2 id="cs-a-name"></h2>
+          <p id="cs-a-desc"></p>
+        </div>
+        <span class="vote-hint">Click to vote</span>
+      </button>
+
+      <div class="vs" aria-hidden="true">VS</div>
+
+      <button class="cs-card" id="cs-b" type="button">
+        <div class="cs-image-wrap">
+          <img id="cs-b-img" alt="" />
+        </div>
+        <div class="cs-info">
+          <span class="cs-rarity" id="cs-b-rarity"></span>
+          <h2 id="cs-b-name"></h2>
+          <p id="cs-b-desc"></p>
+        </div>
+        <span class="vote-hint">Click to vote</span>
+      </button>
+    </section>
+
+    <section class="controls">
+      <button id="rankings-btn" class="rankings-btn" type="button">Show Rankings</button>
+      <div class="stats">Votes cast: <span id="vote-count">0</span></div>
+    </section>
+
+    <div class="modal" id="rankings-modal" hidden>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="rankings-title">
+        <header class="modal-header">
+          <h2 id="rankings-title">Current Rankings</h2>
+          <button id="close-modal" class="close-btn" type="button" aria-label="Close">×</button>
+        </header>
+        <ol class="rankings-list" id="rankings-list"></ol>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
