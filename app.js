@@ -21,7 +21,7 @@ async function init() {
   } catch (err) {
     console.error(err);
     $("cs-a-name").textContent = "Failed to load";
-    $("cs-b-name").textContent = "Check console";
+    $("cs-b-name").textContent = err.message || String(err);
   }
 }
 
@@ -81,9 +81,10 @@ function renderMatchup() {
     };
     $(`${prefix}-name`).textContent = cs.name;
     $(`${prefix}-desc`).textContent = cs.description;
-    const rar = $(`${prefix}-rarity`);
-    rar.textContent = cs.rarity;
-    rar.className = `cs-rarity rarity-${cs.rarity.toLowerCase()}`;
+    const rarity = cs.rarity || "Epic";
+	const rar = $(`${prefix}-rarity`);
+	rar.textContent = rarity;
+	rar.className = `cs-rarity rarity-${rarity.toLowerCase()}`;
   }
   document.querySelectorAll(".cs-card").forEach((c) => {
     c.classList.remove("swap-in");
