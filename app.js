@@ -1,7 +1,6 @@
 // ---------- Constants ----------
-const ICON_BASE = "images/cs-small/"; // change if your folder has a different name
+const ICON_BASE = "images/cs-icons/";
 
-// Map of resource names → icon filenames
 const RESOURCE_ICONS = {
   "Ale": "Ale.png",
   "Amber": "Amber.png",
@@ -50,8 +49,6 @@ const RESOURCE_ICONS = {
   "Wood": "Wood.png",
 };
 
-// Pre-built regex matching any resource name (longest first so "Plant Fiber"
-// beats "Fiber", "Ancient Tablet" beats "Tablet", etc.).
 const RESOURCE_REGEX = (() => {
   const names = Object.keys(RESOURCE_ICONS).sort((a, b) => b.length - a.length);
   const escaped = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
@@ -81,24 +78,17 @@ function rarityClass(r) {
   return `rarity-${String(r || "N/A").toLowerCase().replace(/\//g, "-")}`;
 }
 
-// Wraps each occurrence of a resource name in an inline <img>.
 function formatDescription(text) {
   if (!text) return "";
-  // Replace with placeholders first (so the regex doesn't match inside the
-  // alt attributes we'll inject next).
   const placeholders = [];
   const P = (i) => `\uE000${i}\uE001`;
   let working = text.replace(RESOURCE_REGEX, (match) => {
     placeholders.push(match);
     return P(placeholders.length - 1);
   });
-  // Escape the working string (placeholders survive this — they contain no
-  // HTML-special characters).
   let html = escapeHtml(working);
-  // Swap placeholders for actual <img> + text.
   html = html.replace(/\uE000(\d+)\uE001/g, (_, i) => {
     const name = placeholders[Number(i)];
-    // Find canonical key (case-insensitive) for the icon filename
     const key = Object.keys(RESOURCE_ICONS).find(k => k.toLowerCase() === name.toLowerCase());
     const src = encodeURI(ICON_BASE + RESOURCE_ICONS[key]);
     return `<img class="inline-icon" src="${src}" alt="${escapeHtml(name)}" loading="lazy">${escapeHtml(name)}`;
@@ -121,6 +111,10 @@ async function init() {
     console.error(err);
     $("cs-a-name").textContent = "Failed to load";
     $("cs-b-name").textContent = err.message || String(err);
+  } finally {
+    // Always hide the loading screen, success or failure.
+    const loader = document.getElementById("loading");
+    if (loader) loader.classList.add("hidden");
   }
 }
 
@@ -140,7 +134,6 @@ async function refreshRankings() {
   }
 }
 
-// ---------- Progress bar (4 markers, scaled to 1000) ----------
 function updateVoteProgress(count) {
   const pct = Math.max(0, Math.min((count / 1000) * 100, 100));
   $("vote-progress-fill").style.width = pct + "%";
@@ -248,10 +241,9 @@ async function vote(winnerIdx) {
   await sendVote;
 }
 
-// ---------- Rankings modal (horizontal bar graph) ----------
+// ---------- Rankings modal ----------
 function showRankings() {
   const list = $("rankings-list");
-
   const sorted = state.cornerstones
     .map((cs) => {
       const stored = state.ratings[cs.id];
@@ -262,8 +254,6 @@ function showRankings() {
     })
     .sort((x, y) => y.rating - x.rating);
 
-  // Scale bars relative to the current top rating (floor at 1200 so the bar
-  // doesn't look 100% full when everything is bunched near the initial values).
   const maxRating = Math.max(...sorted.map(cs => cs.rating), 1200);
 
   list.innerHTML = sorted.map((cs, i) => {
