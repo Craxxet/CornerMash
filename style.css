@@ -36,7 +36,6 @@ body {
   background-repeat: no-repeat;
 }
 
-/* Lighter at the bottom so the background image shines through */
 .bg-overlay {
   position: fixed; inset: 0;
   background: linear-gradient(180deg,
@@ -145,7 +144,6 @@ body {
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-/* Icons: shrunk to 60% of card width, centered */
 .cs-image-wrap {
   width: 60%;
   aspect-ratio: 1 / 1;
@@ -170,7 +168,16 @@ body {
 
 .cs-info { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .cs-info h2 { font-size: 1.15rem; margin: 0; line-height: 1.3; }
-.cs-info p  { font-size: 0.92rem; color: var(--text-dim); margin: 0; line-height: 1.4; }
+.cs-info p  { font-size: 0.92rem; color: var(--text-dim); margin: 0; line-height: 1.5; }
+
+/* Inline icons inside descriptions */
+.inline-icon {
+  height: 1.05em;
+  width: auto;
+  vertical-align: -0.18em;
+  margin-right: 2px;
+  display: inline-block;
+}
 
 .cs-rarity {
   display: inline-block;
@@ -186,7 +193,6 @@ body {
 .rarity-legendary { background: rgba(240,176,74,0.15);  color: var(--legendary); border: 1px solid rgba(240,176,74,0.35); }
 .rarity-na        { background: rgba(200,169,106,0.20); color: var(--na);        border: 1px solid rgba(200,169,106,0.45); font-weight: 700; }
 
-/* Static, subtle arrow-key hint at the bottom corners of each card */
 .key-hint {
   position: absolute;
   bottom: 10px;
@@ -240,13 +246,12 @@ body {
 }
 .rankings-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-/* Card-like stats block so it stands out from the background */
 .stats {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  min-width: 220px;
+  min-width: 360px;
   padding: 10px 14px 14px;
   background: rgba(8, 10, 14, 0.55);
   border: 1px solid rgba(255,255,255,0.06);
@@ -266,17 +271,17 @@ body {
   font-weight: 700;
 }
 
-/* ---------- Progress bar ---------- */
+/* ---------- Progress bar (wider, 4 markers) ---------- */
 .vote-progress {
   width: 100%;
-  max-width: 240px;
+  max-width: 340px;
 }
 .vote-progress-track {
   position: relative;
   height: 6px;
   background: rgba(255,255,255,0.08);
   border-radius: 3px;
-  margin-top: 18px; /* space for the star + label above */
+  margin-top: 22px; /* room for star + label above */
 }
 .vote-progress-fill {
   position: relative;
@@ -289,7 +294,7 @@ body {
 }
 .vote-progress-marker {
   position: absolute;
-  top: -18px;
+  top: -22px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -306,7 +311,7 @@ body {
 }
 .vote-progress-tick {
   width: 1px;
-  height: 14px;
+  height: 16px;
   background: rgba(255,255,255,0.3);
   transition: background 0.4s ease;
 }
@@ -325,7 +330,7 @@ body {
   text-shadow: 0 0 8px rgba(255,215,0,0.6);
 }
 
-/* ---------- Modal ---------- */
+/* ---------- Rankings modal (horizontal bar graph) ---------- */
 .modal {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.7);
@@ -345,8 +350,8 @@ body {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   width: 100%;
-  max-width: 640px;
-  max-height: 85vh;
+  max-width: 920px;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow);
@@ -361,8 +366,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 16px 22px;
   border-bottom: 1px solid var(--panel-border);
+  flex-shrink: 0;
 }
 .modal-header h2 { margin: 0; font-size: 1.2rem; }
 .close-btn {
@@ -381,35 +387,108 @@ body {
 .rankings-list {
   list-style: none;
   margin: 0;
-  padding: 8px 0;
+  padding: 4px 0;
   overflow-y: auto;
+  flex: 1;
 }
-.rankings-list li {
+
+.rankings-bar-item {
   display: grid;
-  grid-template-columns: 40px 1fr auto auto;
-  gap: 12px;
-  padding: 10px 20px;
+  grid-template-columns: 32px 48px 1fr 72px;
+  gap: 14px;
   align-items: center;
+  padding: 8px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 0.95rem;
+  transition: background var(--transition);
 }
-.rankings-list li:last-child { border-bottom: none; }
-.rankings-list .rank {
+.rankings-bar-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+.rankings-bar-item:last-child { border-bottom: none; }
+
+.rankings-bar-rank {
   font-variant-numeric: tabular-nums;
   color: var(--text-dim);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
 }
-.rankings-list .name { font-weight: 500; }
-.rankings-list .record { color: var(--text-dim); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
-.rankings-list .rating { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+.rankings-bar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+.rankings-bar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.rankings-bar-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rankings-bar-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rankings-bar-rarity {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.rankings-bar-rarity.rarity-epic      { background: rgba(176,124,255,0.15); color: var(--epic); }
+.rankings-bar-rarity.rarity-legendary { background: rgba(240,176,74,0.15);  color: var(--legendary); }
+.rankings-bar-rarity.rarity-na        { background: rgba(200,169,106,0.15); color: var(--na); }
+.rankings-bar-record {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.rankings-bar-track {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.rankings-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.rankings-bar-fill.rarity-epic      { background: linear-gradient(90deg, #7c4dff, #b07cff); }
+.rankings-bar-fill.rarity-legendary { background: linear-gradient(90deg, var(--accent), var(--accent-bright)); }
+.rankings-bar-fill.rarity-na        { background: linear-gradient(90deg, #777, #aaa); }
+.rankings-bar-rating {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+  font-size: 1.05rem;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
-  .matchup {
-    grid-template-columns: 1fr;
-  }
+  .matchup { grid-template-columns: 1fr; }
   .vs { padding: 4px 0; font-size: 1rem; }
   .cs-card { min-height: 0; }
   .controls { justify-content: center; }
-  .stats { align-items: center; width: 100%; }
+  .stats { align-items: stretch; width: 100%; min-width: 0; }
+  .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
+  .rankings-bar-icon { width: 36px; height: 36px; }
+  .rankings-bar-record { display: none; }
 }
