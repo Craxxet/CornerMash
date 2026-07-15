@@ -1,4 +1,4 @@
-name = "cornermash-pages"
+name = "cornermash"
 compatibility_date = "2024-09-23"
 
 # This is how the functions access the DO: env.RATINGS_DO
