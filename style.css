@@ -51,12 +51,37 @@ body {
   color: var(--accent);
   font-size: 1.1rem;
   letter-spacing: 0.5px;
-  animation: loading-pulse 1.5s ease-in-out infinite;
 }
+
+.loading-dots {
+  display: inline-block;
+  margin-left: 2px;
+}
+
+.loading-dots span {
+  display: inline-block;
+  opacity: 0;
+  animation: loading-dot 1.4s ease-in-out infinite both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: 0s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes loading-dot {
+  0%, 100% { opacity: 0; }
+  30%      { opacity: 1; }
+  60%      { opacity: 0; }
+}
+
 .loading-screen.hidden { display: none; }
-@keyframes loading-pulse {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+
+/* Respect users who'd rather not see motion */
+@media (prefers-reduced-motion: reduce) {
+  .loading-dots span {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 /* ---------- Layout ---------- */

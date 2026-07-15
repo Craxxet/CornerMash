@@ -1,5 +1,5 @@
 // ---------- Constants ----------
-const ICON_BASE = "images/cs-icons/";
+const ICON_BASE = "images/cs-small/";
 
 const RESOURCE_ICONS = {
   "Ale": "Ale.png",
