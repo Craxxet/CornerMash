@@ -1,0 +1,19 @@
+name = "cornermash-pages"
+compatibility_date = "2024-09-23"
+
+# This is how the functions access the DO: env.RATINGS_DO
+[[durable_objects.bindings]]
+name = "RATINGS_DO"
+class_name = "RatingsDO"
+
+# This tells Cloudflare to create the RatingsDO class on first deploy.
+# The "tag" is just a version label — "v1" is fine.
+[[migrations]]
+tag = "v1"
+new_classes = ["RatingsDO"]
+
+# Old KV binding — leave commented out for now while you verify the DO works.
+# You can delete this section entirely once you're confident.
+# [[kv_namespaces]]
+# binding = "RATINGS"
+# id = "your-old-kv-id-here"
