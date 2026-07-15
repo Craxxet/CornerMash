@@ -2,19 +2,14 @@ name = "cornermash"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "./"
 
-# This is how the functions access the DO: env.RATINGS_DO
+# DO binding: the class lives in the "cornermash-do" Worker.
+# Pages Functions access it via env.RATINGS_DO at runtime.
 [[durable_objects.bindings]]
 name = "RATINGS_DO"
 class_name = "RatingsDO"
+script_name = "cornermash-do"
 
-# This tells Cloudflare to create the RatingsDO class on first deploy.
-# The "tag" is just a version label — "v1" is fine.
-[[migrations]]
-tag = "v1"
-new_classes = ["RatingsDO"]
-
-# Old KV binding — leave commented out for now while you verify the DO works.
-# You can delete this section entirely once you're confident.
+# Old KV binding — leave commented while you verify DO works.
 # [[kv_namespaces]]
 # binding = "RATINGS"
-# id = "your-old-kv-id-here"
+# id = "..."

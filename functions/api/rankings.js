@@ -1,6 +1,3 @@
-// functions/api/rankings.js
-import { RatingsDO } from "../_ratings-do.js";
-
 export async function onRequestGet(context) {
   const id = context.env.RATINGS_DO.idFromName("global");
   const stub = context.env.RATINGS_DO.get(id);
