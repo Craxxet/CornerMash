@@ -8,8 +8,10 @@
   --text: #e8ecf2;
   --text-dim: #9aa3b2;
   --accent: #c8a96a;
+  --accent-bright: #ffd700;
   --epic: #b07cff;
   --legendary: #f0b04a;
+  --na: #c8a96a;
   --good: #5dd39e;
   --bad: #e57373;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -34,9 +36,13 @@ body {
   background-repeat: no-repeat;
 }
 
+/* Lighter at the bottom so the background image shines through */
 .bg-overlay {
   position: fixed; inset: 0;
-  background: linear-gradient(180deg, rgba(8,10,14,0.75) 0%, rgba(8,10,14,0.92) 100%);
+  background: linear-gradient(180deg,
+    rgba(8,10,14,0.82) 0%,
+    rgba(8,10,14,0.62) 55%,
+    rgba(8,10,14,0.38) 100%);
   z-index: -1;
 }
 
@@ -54,7 +60,14 @@ body {
   letter-spacing: 0.5px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
-.subtitle { color: var(--text-dim); margin: 0; font-size: 1rem; }
+.subtitle {
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 6px 0 0;
+  letter-spacing: 0.4px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+}
 
 /* ---------- Matchup ---------- */
 .matchup {
@@ -88,7 +101,6 @@ body {
 }
 
 .cs-card::before {
-  /* Shine sweep on click */
   content: "";
   position: absolute; inset: 0;
   background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
@@ -119,11 +131,6 @@ body {
   filter: grayscale(0.6);
 }
 
-.cs-card.swap-out {
-  opacity: 0;
-  transform: translateY(8px) scale(0.98);
-}
-
 .cs-card.swap-in {
   animation: swapIn 360ms ease both;
 }
@@ -138,15 +145,16 @@ body {
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
+/* Icons: shrunk to 60% of card width, centered */
 .cs-image-wrap {
-  width: 100%;
+  width: 60%;
   aspect-ratio: 1 / 1;
+  margin: 0 auto 14px;
   background: linear-gradient(135deg, #1a1f29, #0f131a);
   border-radius: 10px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  margin-bottom: 14px;
 }
 .cs-image-wrap img {
   width: 100%; height: 100%;
@@ -176,21 +184,27 @@ body {
 }
 .rarity-epic      { background: rgba(176,124,255,0.15); color: var(--epic);      border: 1px solid rgba(176,124,255,0.35); }
 .rarity-legendary { background: rgba(240,176,74,0.15);  color: var(--legendary); border: 1px solid rgba(240,176,74,0.35); }
+.rarity-na        { background: rgba(200,169,106,0.20); color: var(--na);        border: 1px solid rgba(200,169,106,0.45); font-weight: 700; }
 
-.vote-hint {
+/* Static, subtle arrow-key hint at the bottom corners of each card */
+.key-hint {
   position: absolute;
-  top: 14px; right: 14px;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+  bottom: 10px;
+  left: 12px;
+  font-size: 1.1rem;
   color: var(--text-dim);
-  background: rgba(0,0,0,0.4);
-  padding: 4px 8px;
-  border-radius: 4px;
-  opacity: 0;
+  opacity: 0.35;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
   transition: opacity var(--transition);
 }
-.cs-card:hover .vote-hint { opacity: 1; }
+.cs-card:hover .key-hint { opacity: 0.7; }
+.key-hint-right {
+  left: auto;
+  right: 12px;
+}
 
 .vs {
   align-self: center;
@@ -204,12 +218,12 @@ body {
 
 /* ---------- Controls ---------- */
 .controls {
-  margin-top: 28px;
+  margin-top: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
 
 .rankings-btn {
@@ -226,7 +240,90 @@ body {
 }
 .rankings-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-.stats { color: var(--text-dim); font-size: 0.9rem; }
+/* Card-like stats block so it stands out from the background */
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 220px;
+  padding: 10px 14px 14px;
+  background: rgba(8, 10, 14, 0.55);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.stats-count {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2px;
+}
+.stats-count #vote-count {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- Progress bar ---------- */
+.vote-progress {
+  width: 100%;
+  max-width: 240px;
+}
+.vote-progress-track {
+  position: relative;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  margin-top: 18px; /* space for the star + label above */
+}
+.vote-progress-fill {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.vote-progress-marker {
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.vote-progress-star {
+  font-size: 0.95rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 3px;
+  transition: color 0.4s ease, transform 0.4s ease;
+}
+.vote-progress-tick {
+  width: 1px;
+  height: 14px;
+  background: rgba(255,255,255,0.3);
+  transition: background 0.4s ease;
+}
+.vote-progress-label {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.vote-progress-marker.earned .vote-progress-tick {
+  background: var(--accent);
+}
+.vote-progress-marker.earned .vote-progress-star {
+  color: var(--accent-bright);
+  transform: scale(1.3);
+  text-shadow: 0 0 8px rgba(255,215,0,0.6);
+}
 
 /* ---------- Modal ---------- */
 .modal {
@@ -313,5 +410,6 @@ body {
   }
   .vs { padding: 4px 0; font-size: 1rem; }
   .cs-card { min-height: 0; }
-  .controls { justify-content: center; text-align: center; }
+  .controls { justify-content: center; }
+  .stats { align-items: center; width: 100%; }
 }

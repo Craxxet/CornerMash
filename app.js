@@ -1,7 +1,7 @@
 // ---------- State ----------
 const state = {
   cornerstones: [],
-  ratings: {},     // id -> { rating, wins, losses }
+  ratings: {},
   currentPair: [null, null],
   voteCount: 0,
   isAnimating: false,
@@ -14,8 +14,11 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 async function init() {
   try {
     const res = await fetch("data/cornerstones.json");
-    if (!res.ok) throw new Error(`Failed to load CS data: ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} — check data/cornerstones.json`);
     state.cornerstones = await res.json();
+    if (!Array.isArray(state.cornerstones)) {
+      throw new Error("cornerstones.json is not a JSON array");
+    }
     await refreshRankings();
     showNewMatchup();
   } catch (err) {
@@ -33,10 +36,20 @@ async function refreshRankings() {
     state.ratings = data.ratings || {};
     state.voteCount = data.totalVotes || 0;
     $("vote-count").textContent = state.voteCount;
+    updateVoteProgress(state.voteCount);
   } catch (err) {
     console.warn("Could not fetch rankings, using initial ratings:", err);
     state.ratings = {};
+    updateVoteProgress(0);
   }
+}
+
+// ---------- Progress bar ----------
+function updateVoteProgress(count) {
+  const pct = Math.max(0, Math.min(count, 100));
+  $("vote-progress-fill").style.width = pct + "%";
+  $("marker-50").classList.toggle("earned", count >= 50);
+  $("marker-100").classList.toggle("earned", count >= 100);
 }
 
 // ---------- Pairing ----------
@@ -70,8 +83,8 @@ function renderMatchup() {
     [state.currentPair[0], "cs-a"],
     [state.currentPair[1], "cs-b"],
   ]) {
+    const rarity = cs.rarity || "N/A";
     const img = $(`${prefix}-img`);
-    // URL-encode so spaces/apostrophes in the file name are safe
     img.src = encodeURI(cs.image);
     img.alt = cs.name;
     img.onerror = () => {
@@ -81,10 +94,9 @@ function renderMatchup() {
     };
     $(`${prefix}-name`).textContent = cs.name;
     $(`${prefix}-desc`).textContent = cs.description;
-    const rarity = cs.rarity || "Epic";
-	const rar = $(`${prefix}-rarity`);
-	rar.textContent = rarity;
-	rar.className = `cs-rarity rarity-${rarity.toLowerCase()}`;
+    const rar = $(`${prefix}-rarity`);
+    rar.textContent = rarity;
+    rar.className = `cs-rarity rarity-${rarity.toLowerCase().replace(/\//g, "-")}`;
   }
   document.querySelectorAll(".cs-card").forEach((c) => {
     c.classList.remove("swap-in");
@@ -109,7 +121,6 @@ async function vote(winnerIdx) {
   loserEl.classList.add("rejected");
   await wait(420);
 
-  // Send initial ratings so the server can seed CSs it has never seen
   const sendVote = fetch("/api/vote", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -127,6 +138,7 @@ async function vote(winnerIdx) {
       if (data.loser)  state.ratings[data.loser.id]  = data.loser;
       state.voteCount = data.totalVotes ?? state.voteCount + 1;
       $("vote-count").textContent = state.voteCount;
+      updateVoteProgress(state.voteCount);
     })
     .catch((err) => console.error("Vote failed:", err));
 
@@ -143,7 +155,6 @@ function showRankings() {
   const list = $("rankings-list");
   const sorted = state.cornerstones
     .map((cs) => {
-      // Stored rating wins; otherwise fall back to the per-CS initial rating
       const stored = state.ratings[cs.id];
       const rating = stored ? stored.rating   : cs.initialRating;
       const wins   = stored ? stored.wins     : 0;

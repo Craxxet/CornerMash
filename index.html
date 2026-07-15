@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cornerstone Matchmaker</title>
+  <title>CornerMash</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,8 +11,8 @@
 
   <main class="app">
     <header class="hero">
-      <h1>Cornerstone Matchmaker</h1>
-      <p class="subtitle">Which annual cornerstone would you pick?</p>
+      <h1>CornerMash</h1>
+      <p class="subtitle">Pick the stronger cornerstone.</p>
     </header>
 
     <section class="matchup" id="matchup">
@@ -25,7 +25,7 @@
           <h2 id="cs-a-name"></h2>
           <p id="cs-a-desc"></p>
         </div>
-        <span class="vote-hint">Click to vote</span>
+        <span class="key-hint" aria-hidden="true">←</span>
       </button>
 
       <div class="vs" aria-hidden="true">VS</div>
@@ -39,13 +39,30 @@
           <h2 id="cs-b-name"></h2>
           <p id="cs-b-desc"></p>
         </div>
-        <span class="vote-hint">Click to vote</span>
+        <span class="key-hint key-hint-right" aria-hidden="true">→</span>
       </button>
     </section>
 
     <section class="controls">
       <button id="rankings-btn" class="rankings-btn" type="button">Show Rankings</button>
-      <div class="stats">Votes cast: <span id="vote-count">0</span></div>
+      <div class="stats">
+        <div class="stats-count">Votes cast: <span id="vote-count">0</span></div>
+        <div class="vote-progress">
+          <div class="vote-progress-track">
+            <div class="vote-progress-fill" id="vote-progress-fill"></div>
+            <div class="vote-progress-marker" id="marker-50" style="left: 50%">
+              <div class="vote-progress-star">★</div>
+              <div class="vote-progress-tick"></div>
+              <div class="vote-progress-label">50</div>
+            </div>
+            <div class="vote-progress-marker" id="marker-100" style="left: 100%">
+              <div class="vote-progress-star">★</div>
+              <div class="vote-progress-tick"></div>
+              <div class="vote-progress-label">100</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <div class="modal" id="rankings-modal" hidden>
