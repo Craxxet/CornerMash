@@ -212,33 +212,40 @@ async function vote(winnerIdx) {
   loserEl.classList.add("rejected");
   await wait(420);
 
-  const sendVote = fetch("/api/vote", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      winner: winner.id,
-      loser: loser.id,
-      winnerInitial: winner.initialRating,
-      loserInitial:  loser.initialRating,
-    }),
-  })
-    .then(async (res) => {
-      if (!res.ok) throw new Error(`Vote API: ${res.status}`);
-      const data = await res.json();
-      if (data.winner) state.ratings[data.winner.id] = data.winner;
-      if (data.loser)  state.ratings[data.loser.id]  = data.loser;
-      state.voteCount = data.totalVotes ?? state.voteCount + 1;
-      $("vote-count").textContent = state.voteCount;
-      updateVoteProgress(state.voteCount);
-    })
-    .catch((err) => console.error("Vote failed:", err));
+  let voteOk = false;
+  try {
+    const res = await fetch("/api/vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        winner: winner.id,
+        loser:  loser.id,
+        winnerInitial: winner.initialRating,
+        loserInitial:  loser.initialRating,
+      }),
+    });
+    if (!res.ok) throw new Error(`Vote API: ${res.status}`);
+
+    const data = await res.json();
+    if (data.winner) state.ratings[data.winner.id] = data.winner;
+    if (data.loser)  state.ratings[data.loser.id]  = data.loser;
+    state.voteCount = data.totalVotes ?? state.voteCount + 1;
+    $("vote-count").textContent = state.voteCount;
+    updateVoteProgress(state.voteCount);
+    voteOk = true;
+  } catch (err) {
+    console.error("Vote failed:", err);
+    // voteOk stays false → same matchup stays visible
+  }
 
   await wait(180);
   winnerEl.classList.remove("chosen");
   loserEl.classList.remove("rejected");
-  showNewMatchup();
+
+  // Only advance to the next matchup if the server actually got the vote.
+  // If the fetch failed, the user sees the same matchup and can click again.
+  if (voteOk) showNewMatchup();
   state.isAnimating = false;
-  await sendVote;
 }
 
 // ---------- Rankings modal ----------
