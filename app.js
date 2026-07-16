@@ -145,18 +145,50 @@ function updateVoteProgress(count) {
 
 // ---------- Pairing ----------
 function getRandomPair() {
-  const n = state.cornerstones.length;
+  const cornerstones = state.cornerstones;
+  const ratings     = state.ratings || {};
+  const n           = cornerstones.length;
+  const BAND        = 200;     // prefer pairs within 200 ELO of each other
+
+  // Helper: was this exact pair just shown? Used to avoid back-to-back repeats.
   const prevIds = state.currentPair.map((c) => c && c.id).filter(Boolean);
-  let aIdx, bIdx;
+  const isPreviousPair = (aId, bId) =>
+    prevIds.length === 2 && prevIds.includes(aId) && prevIds.includes(bId);
+
+  // Tier 1: try to find a same-band, non-repeating pair (up to 20 attempts).
   for (let attempt = 0; attempt < 20; attempt++) {
-    aIdx = Math.floor(Math.random() * n);
-    bIdx = Math.floor(Math.random() * n);
+    const aIdx = Math.floor(Math.random() * n);
+    const bIdx = Math.floor(Math.random() * n);
     if (aIdx === bIdx) continue;
-    const a = state.cornerstones[aIdx].id;
-    const b = state.cornerstones[bIdx].id;
-    if (prevIds.length === 2 && prevIds.includes(a) && prevIds.includes(b)) continue;
-    break;
+
+    const a = cornerstones[aIdx];
+    const b = cornerstones[bIdx];
+    const aRating = ratings[a.id]?.rating ?? 1000;
+    const bRating = ratings[b.id]?.rating ?? 1000;
+
+    // The actual band filter — this is the line that does the work.
+    if (Math.abs(aRating - bRating) > BAND) continue;
+
+    if (isPreviousPair(a.id, b.id)) continue;
+
+    return [aIdx, bIdx];
   }
+
+  // Tier 2: relax the band filter, still avoid the previous pair.
+  // (This kicks in only if a is an extreme outlier with no neighbors in band.)
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const aIdx = Math.floor(Math.random() * n);
+    const bIdx = Math.floor(Math.random() * n);
+    if (aIdx === bIdx) continue;
+    if (isPreviousPair(cornerstones[aIdx].id, cornerstones[bIdx].id)) continue;
+    return [aIdx, bIdx];
+  }
+
+  // Tier 3: any non-self pair, period. Should never be reached
+  // with 138 CSes, but the safety net is one line.
+  const aIdx = Math.floor(Math.random() * n);
+  let bIdx   = Math.floor(Math.random() * n);
+  while (bIdx === aIdx) bIdx = Math.floor(Math.random() * n);
   return [aIdx, bIdx];
 }
 
