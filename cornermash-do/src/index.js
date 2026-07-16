@@ -19,17 +19,21 @@ export class RatingsDO {
   }
 
   async fetch(request) {
-    const url = new URL(request.url);
+  const url = new URL(request.url);
 
-    if (url.pathname === "/vote" && request.method === "POST") {
-      return await this.handleVote(request);
-    }
+  if (url.pathname === "/vote" && request.method === "POST") {
+    return await this.handleVote(request);
+  }
 
-    if (url.pathname === "/rankings" && request.method === "GET") {
-      return await this.handleRankings();
-    }
+  if (url.pathname === "/rankings" && request.method === "GET") {
+    return await this.handleRankings();
+  }
 
-    return new Response("Not found", { status: 404 });
+  if (url.pathname === "/reset" && request.method === "POST") {
+    return await this.handleReset(request);
+  }
+
+  return new Response("Not found", { status: 404 });
   }
 
   async handleVote(request) {
@@ -69,6 +73,25 @@ export class RatingsDO {
       ratings: this.ratings,
       totalVotes: this.voteCount,
     });
+  }
+  async handleReset(request) {
+  const url = new URL(request.url);
+  const secret = url.searchParams.get("secret");
+  if (secret !== "cornermash-flush-all-the-data-in-this-year-of-our-lord-2026") {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  // Wait for any in-flight vote to finish writing, then wipe.
+  // Without this, a vote that started just before the reset could
+  // land its storage.put AFTER our deletes, leaving a ghost rating.
+  await this.state.blockConcurrencyWhile(async () => {
+    await this.state.storage.delete("ratings");
+    await this.state.storage.delete("voteCount");
+    this.ratings = {};
+    this.voteCount = 0;
+  });
+
+  return Response.json({ ok: true, message: "DO storage cleared" });
   }
 }
 
