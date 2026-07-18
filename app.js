@@ -135,12 +135,17 @@ async function refreshRankings() {
 }
 
 function updateVoteProgress(count) {
-  const pct = Math.max(0, Math.min((count / 1000) * 100, 100));
+  const max = 5000;             // was 1000 — the new full-scale target
+  const pct = Math.max(0, Math.min((count / max) * 100, 100));
   $("vote-progress-fill").style.width = pct + "%";
-  $("marker-250").classList.toggle("earned", count >= 250);
-  $("marker-500").classList.toggle("earned", count >= 500);
-  $("marker-750").classList.toggle("earned", count >= 750);
-  $("marker-1000").classList.toggle("earned", count >= 1000);
+
+  // Light up every marker whose threshold the count has passed.
+  // Works for any number of markers — add or remove them in HTML
+  // without touching this function.
+  document.querySelectorAll(".vote-progress-marker").forEach((marker) => {
+    const threshold = parseInt(marker.dataset.threshold, 10);
+    marker.classList.toggle("earned", count >= threshold);
+  });
 }
 
 // ---------- Pairing ----------
@@ -339,3 +344,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 init();
+
+// TEMPORARY: uncomment to preview the progress bar
+// updateVoteProgress(2300);

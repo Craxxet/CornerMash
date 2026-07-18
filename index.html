@@ -51,30 +51,45 @@
       <div class="stats">
         <div class="stats-count">Votes cast: <span id="vote-count">0</span></div>
         <div class="vote-progress">
-          <div class="vote-progress-track">
-            <div class="vote-progress-fill" id="vote-progress-fill"></div>
-            <div class="vote-progress-marker" id="marker-250" style="left: 25%">
-              <div class="vote-progress-star">★</div>
-              <div class="vote-progress-tick"></div>
-              <div class="vote-progress-label">250</div>
-            </div>
-            <div class="vote-progress-marker" id="marker-500" style="left: 50%">
-              <div class="vote-progress-star">★</div>
-              <div class="vote-progress-tick"></div>
-              <div class="vote-progress-label">500</div>
-            </div>
-            <div class="vote-progress-marker" id="marker-750" style="left: 75%">
-              <div class="vote-progress-star">★</div>
-              <div class="vote-progress-tick"></div>
-              <div class="vote-progress-label">750</div>
-            </div>
-            <div class="vote-progress-marker" id="marker-1000" style="left: 100%">
-              <div class="vote-progress-star">★</div>
-              <div class="vote-progress-tick"></div>
-              <div class="vote-progress-label">1,000</div>
-            </div>
-          </div>
-        </div>
+  <div class="vote-progress-track">
+    <div class="vote-progress-fill" id="vote-progress-fill"></div>
+    <div class="vote-progress-marker" data-threshold="500"  style="left: 10%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">500</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="1000" style="left: 20%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">1,000</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="1500" style="left: 30%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">1,500</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="2000" style="left: 40%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">2,000</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="3000" style="left: 60%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">3,000</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="4000" style="left: 80%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">4,000</div>
+    </div>
+    <div class="vote-progress-marker" data-threshold="5000" style="left: 100%">
+      <div class="vote-progress-star">★</div>
+      <div class="vote-progress-tick"></div>
+      <div class="vote-progress-label">5,000</div>
+    </div>
+  </div>
+</div>
       </div>
     </section>
 
