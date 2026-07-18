@@ -136,5 +136,5 @@
   {"id":"woodpecker-technique","name":"Woodpecker Technique","rarity":"Legendary","tier":"E","initialRating":600,"description":"Gain 2 Insects every time woodcutters cut down a tree during the Storm.","image":"images/cs/Woodpecker Technique.png"},
   {"id":"work-safety-guide","name":"Work Safety Guide","rarity":"Epic","tier":"F","initialRating":400,"description":"Every villager with their need for education fulfilled increases global production speed by 5%.","image":"images/cs/Work Safety Guide.png"},
   {"id":"zhorgs-secret-ingredient","name":"Zhorg's Secret Ingredient","rarity":"Epic","tier":"Situational","initialRating":1000,"description":"Gain 10 Skewers for every 10 Pickled Goods produced.","image":"images/cs/Zhorg's Secret Ingredient.png"},
-  {"id":"amber","name":"Amber","rarity":"N/A","tier":"N/A","initialRating":1000,"description":"Money !!","image":"images/cs/Amber.png"}
+  {"id":"amber","name":"Amber","rarity":"N/A","tier":"N/A","initialRating":1000,"description":"10 Amber","image":"images/cs/Amber.png"}
 ]
