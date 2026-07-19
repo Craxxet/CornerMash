@@ -290,8 +290,8 @@ body {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  min-width: 560px;           /* was 360px — fits the 540px progress bar + padding */
-  padding: 10px 14px 14px;
+  min-width: 560px;
+  padding: 10px 14px 28px;        /* was 10px 14px 14px — extra 14px covers the labels */
   background: rgba(8, 10, 14, 0.55);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
@@ -547,7 +547,7 @@ body {
 .rankings-tooltip {
   position: absolute;
   left: 50%;
-  top: calc(100% + 8px);
+  bottom: calc(100% + 8px);
   transform: translateX(-50%) translateY(4px);
   background: #14181f;
   color: var(--text);
@@ -558,13 +558,13 @@ body {
   line-height: 1.5;
   z-index: 10;
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  pointer-events: none;          /* let the cursor pass through to the row */
+  pointer-events: none;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
   white-space: normal;
   width: max-content;
-  max-width: 480px;              /* prevents super-long descriptions from spanning the modal */
+  max-width: min(480px, calc(100vw - 40px));   /* was: max-width: 480px */
 }
 
 .rankings-bar-item:hover .rankings-tooltip {
@@ -578,4 +578,8 @@ body {
 }
 .vote-progress.unlocked .vote-progress-marker.milestone-late {
   display: flex;
+}
+
+.vote-progress.unlocked .vote-progress-marker:not(.milestone-late) {  /* Once the late-tier milestones unlock, hide the original 7 markers.    The fill already shows we've passed them; the visible stars should    be the next goals, not the ones already earned. */
+  display: none;
 }

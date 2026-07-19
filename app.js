@@ -144,7 +144,7 @@ function updateVoteProgress(count) {
   // in sync if the count ever decreases (e.g. if you re-seed data).
   const progressEl = document.querySelector(".vote-progress");
   if (progressEl) {
-    progressEl.classList.toggle("unlocked", count >= 5000);
+    progressEl.classList.toggle("unlocked", count >= 4500);
   }
 
   // Light up every marker whose threshold the count has passed.
@@ -354,4 +354,4 @@ document.addEventListener("keydown", (e) => {
 init();
 
 // TEMPORARY: uncomment to preview the progress bar
- updateVoteProgress(8000);
+ updateVoteProgress(4624);
