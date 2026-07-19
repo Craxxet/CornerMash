@@ -135,13 +135,19 @@ async function refreshRankings() {
 }
 
 function updateVoteProgress(count) {
-  const max = 5000;             // was 1000 — the new full-scale target
+  const max = 20000;  // was 5000 — extended to accommodate the new high-tier milestones
   const pct = Math.max(0, Math.min((count / max) * 100, 100));
   $("vote-progress-fill").style.width = pct + "%";
 
+  // Unlock the late milestones (7.5k / 10k / 15k / 20k) once the
+  // count passes 5,000. The class is toggled each call so it stays
+  // in sync if the count ever decreases (e.g. if you re-seed data).
+  const progressEl = document.querySelector(".vote-progress");
+  if (progressEl) {
+    progressEl.classList.toggle("unlocked", count >= 5000);
+  }
+
   // Light up every marker whose threshold the count has passed.
-  // Works for any number of markers — add or remove them in HTML
-  // without touching this function.
   document.querySelectorAll(".vote-progress-marker").forEach((marker) => {
     const threshold = parseInt(marker.dataset.threshold, 10);
     marker.classList.toggle("earned", count >= threshold);
@@ -301,28 +307,30 @@ function showRankings() {
   const maxRating = Math.max(...sorted.map(cs => cs.rating), 1200);
 
   list.innerHTML = sorted.map((cs, i) => {
-    const pct = Math.max(2, (cs.rating / maxRating) * 100);
-    const rarity = cs.rarity || "N/A";
-    const rClass = rarityClass(rarity);
-    const iconSrc = encodeURI(cs.image || "");
-    return `
-      <li class="rankings-bar-item">
-        <span class="rankings-bar-rank">#${i + 1}</span>
-        <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
-             onerror="this.onerror=null; this.style.visibility='hidden';">
-        <div class="rankings-bar-info">
-          <div class="rankings-bar-name-row">
-            <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
-            <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
-            <span class="rankings-bar-record">${cs.wins}–${cs.losses}</span>
-          </div>
-          <div class="rankings-bar-track">
-            <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
-          </div>
+  const pct = Math.max(2, (cs.rating / maxRating) * 100);
+  const rarity = cs.rarity || "N/A";
+  const rClass = rarityClass(rarity);
+  const iconSrc = encodeURI(cs.image || "");
+  const description = formatDescription(cs.description || "");
+  return `
+    <li class="rankings-bar-item">
+      <span class="rankings-bar-rank">#${i + 1}</span>
+      <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
+           onerror="this.onerror=null; this.style.visibility='hidden';">
+      <div class="rankings-bar-info">
+        <div class="rankings-bar-name-row">
+          <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
+          <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
+          <span class="rankings-bar-record">${cs.wins}–${cs.losses}</span>
         </div>
-        <span class="rankings-bar-rating">${Math.round(cs.rating)}</span>
-      </li>`;
-  }).join("");
+        <div class="rankings-bar-track">
+          <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
+        </div>
+      </div>
+      <span class="rankings-bar-rating">${Math.round(cs.rating)}</span>
+      ${description ? `<div class="rankings-tooltip">${description}</div>` : ''}
+    </li>`;
+}).join("");
 
   $("rankings-modal").hidden = false;
 }
@@ -346,4 +354,4 @@ document.addEventListener("keydown", (e) => {
 init();
 
 // TEMPORARY: uncomment to preview the progress bar
-// updateVoteProgress(2300);
+ updateVoteProgress(8000);

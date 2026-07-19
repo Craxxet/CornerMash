@@ -532,3 +532,50 @@ body {
   .rankings-bar-icon { width: 36px; height: 36px; }
   .rankings-bar-record { display: none; }
 }
+
+.rankings-bar-item {
+  display: grid;
+  grid-template-columns: 32px 48px 1fr 72px;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--transition);
+  position: relative;            /* NEW — anchor for the tooltip */
+}
+
+.rankings-tooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  background: #14181f;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  z-index: 10;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  pointer-events: none;          /* let the cursor pass through to the row */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  white-space: normal;
+  width: max-content;
+  max-width: 480px;              /* prevents super-long descriptions from spanning the modal */
+}
+
+.rankings-bar-item:hover .rankings-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.vote-progress-marker.milestone-late {
+  display: none;
+}
+.vote-progress.unlocked .vote-progress-marker.milestone-late {
+  display: flex;
+}
