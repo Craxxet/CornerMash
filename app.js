@@ -11,7 +11,7 @@ const RESOURCE_ICONS = {
   "Clay": "Clay.png",
   "Coal": "Coal.png",
   "Copper Ore": "Copper Ore.png",
-  "Crystallized Dew": "Crystallized Dew.png",
+  "Crystalized Dew": "Crystalized Dew.png",
   "Dangerous": "Dangerous.png",
   "Drizzle Water": "Drizzle Water.png",
   "Dye": "Dye.png",
@@ -19,7 +19,8 @@ const RESOURCE_ICONS = {
   "Flour": "Flour.png",
   "Forbidden": "Forbidden.png",
   "Grain": "Grain.png",
-  "Herbs": "Herbs.png",
+  "Herb": "Herb.png",
+  "Herbs": "Herb.png",
   "Insects": "Insects.png",
   "Jerky": "Jerky.png",
   "Leather": "Leather.png",
@@ -33,11 +34,12 @@ const RESOURCE_ICONS = {
   "Plant Fiber": "Plant Fiber.png",
   "Porridge": "Porridge.png",
   "Provisions": "Provisions.png",
-  "Reeds": "Reeds.png",
+  "Reed": "Reed.png",
   "Resin": "Resin.png",
-  "Roots": "Roots.png",
+  "Root": "Root.png",
+  "Roots": "Root.png",
   "Sea Marrow": "Sea Marrow.png",
-  "Simple Tools": "Simple Tools.png",
+  "Tools": "Tools.png",
   "Skewers": "Skewers.png",
   "Stone": "Stone.png",
   "Trade Goods": "Trade Goods.png",
@@ -52,7 +54,7 @@ const RESOURCE_ICONS = {
 const RESOURCE_REGEX = (() => {
   const names = Object.keys(RESOURCE_ICONS).sort((a, b) => b.length - a.length);
   const escaped = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
-  return new RegExp(`\\b(${escaped})\\b`, "gi");
+  return new RegExp(`\\b(${escaped})\\b`, "g");
 })();
 
 // ---------- State ----------
@@ -75,7 +77,8 @@ function escapeHtml(s) {
 }
 
 function rarityClass(r) {
-  return `rarity-${String(r || "N/A").toLowerCase().replace(/\//g, "-")}`;
+  if (!r || r === "N/A") return "rarity-na";
+  return `rarity-${r.toLowerCase().replace(/\//g, "-")}`;
 }
 
 function formatDescription(text) {
@@ -333,6 +336,23 @@ function showRankings() {
       ${description ? `<div class="rankings-tooltip">${description}</div>` : ''}
     </li>`;
 }).join("");
+
+  list.querySelectorAll(".rankings-bar-item").forEach((item) => {
+    const tooltip = item.querySelector(".rankings-tooltip");
+    if (!tooltip) return;
+    item.addEventListener("mouseenter", () => {
+      const itemRect = item.getBoundingClientRect();
+      const listRect = list.getBoundingClientRect();
+      const tooltipHeight = tooltip.offsetHeight || 100;
+      const spaceAbove = itemRect.top - listRect.top;
+      const spaceBelow = listRect.bottom - itemRect.bottom;
+      if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
+        tooltip.classList.add("flip-down");
+      } else {
+        tooltip.classList.remove("flip-down");
+      }
+    });
+  });
 
   $("rankings-modal").hidden = false;
 }

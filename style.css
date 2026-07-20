@@ -512,7 +512,7 @@ body {
 }
 .rankings-bar-fill.rarity-epic      { background: linear-gradient(90deg, #7c4dff, #b07cff); }
 .rankings-bar-fill.rarity-legendary { background: linear-gradient(90deg, var(--accent), var(--accent-bright)); }
-.rankings-bar-fill.rarity-na        { background: linear-gradient(90deg, #777, #aaa); }
+.rankings-bar-fill.rarity-na        { background: linear-gradient(90deg, #c8a96a, #ffd700); }
 .rankings-bar-rating {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
@@ -584,4 +584,14 @@ body {
 
 .vote-progress.unlocked .vote-progress-marker:not(.milestone-late) {  /* Once the late-tier milestones unlock, hide the original 7 markers.    The fill already shows we've passed them; the visible stars should    be the next goals, not the ones already earned. */
   display: none;
+}
+
+.rankings-tooltip.flip-down { /* NEW — for when the tooltip would go off-screen at the top of the viewport */
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.rankings-bar-item:hover .rankings-tooltip.flip-down {
+  transform: translateX(-50%) translateY(0);
 }
