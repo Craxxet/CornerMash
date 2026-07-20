@@ -564,7 +564,9 @@ body {
   transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
   white-space: normal;
   width: max-content;
-  max-width: min(480px, calc(100vw - 40px));   /* was: max-width: 480px */
+  max-width: min(480px, calc(100vw - 24px));  /* tighter - matches modal's 20px padding on each side */
+  word-break: break-word;                    /* handles very long unbreakable strings */
+  overflow-wrap: anywhere;
 }
 
 .rankings-bar-item:hover .rankings-tooltip {

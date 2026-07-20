@@ -220,6 +220,8 @@ function renderMatchup() {
     const rarity = cs.rarity || "N/A";
     const img = $(`${prefix}-img`);
     img.src = encodeURI(cs.image);
+    img.fetchPriority = "high";
+    img.loading = "eager";   // default for above-the-fold images, but explicit is fine
     img.alt = cs.name;
     img.onerror = () => {
       img.onerror = null;
@@ -310,7 +312,7 @@ function showRankings() {
   const pct = Math.max(2, (cs.rating / maxRating) * 100);
   const rarity = cs.rarity || "N/A";
   const rClass = rarityClass(rarity);
-  const iconSrc = encodeURI(cs.image || "");
+  const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/')); // use the thumbnail version of the image for the rankings list
   const description = formatDescription(cs.description || "");
   return `
     <li class="rankings-bar-item">
