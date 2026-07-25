@@ -1,3 +1,5 @@
+<img width="1920" height="848" alt="CornerMash image for readme md" src="https://github.com/user-attachments/assets/8597c54c-64b6-4381-87ba-05320d77f8cf" />
+
 # CornerMash
 
 A 1v1 head-to-head ranker for the annual Cornerstones from *Against the Storm*, deployed on Cloudflare Pages with persistent votes stored in Cloudflare KV.
