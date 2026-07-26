@@ -326,48 +326,57 @@ function showRankings() {
 
   const maxRating = Math.max(...sorted.map(cs => cs.rating), 1200);
 
-  list.innerHTML = sorted.map((cs, i) => {
-  const pct = Math.max(2, (cs.rating / maxRating) * 100);
-  const rarity = cs.rarity || "N/A";
-  const rClass = rarityClass(rarity);
-  const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/')); // use the thumbnail version of the image for the rankings list
-  const description = formatDescription(cs.description || "");
-  const total = cs.wins + cs.losses;
-  const winPct = total > 0 ? Math.round((cs.wins / total) * 100) : 0;
-  const eloDelta = Math.round(cs.rating - cs.initialRating);
-  const eloSign = eloDelta > 0 ? "+" : (eloDelta < 0 ? "" : "±");
-  const eloColor = eloDelta > 0 ? "elo-pos" : (eloDelta < 0 ? "elo-neg" : "elo-zero");
-  return `
-  <li class="rankings-bar-item">
-    <span class="rankings-bar-rank">#${i + 1}</span>
-    <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
-         onerror="this.onerror=null; this.style.visibility='hidden';">
-    <div class="rankings-bar-info">
-      <div class="rankings-bar-name-row">
-        <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
-        <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
+list.innerHTML =
+  `<li class="rankings-bar-header">
+     <span></span><span></span><span></span>
+     <span class="rankings-bar-header-record">Win/Loss</span>
+     <span class="rankings-bar-header-rating">Elo-rating</span>
+   </li>` +
+  sorted.map((cs, i) => {
+    const pct = Math.max(2, (cs.rating / maxRating) * 100);
+    const rarity = cs.rarity || "N/A";
+    const rClass = rarityClass(rarity);
+    const iconSrc = encodeURI(cs.image || "");      /* Previously const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/')); */
+    const description = formatDescription(cs.description || "");
+    const total = cs.wins + cs.losses;
+    const winPct  = total > 0 ? Math.round((cs.wins / total) * 100) : 0;
+    const eloDelta = Math.round(cs.rating - cs.initialRating);
+    const eloSign  = eloDelta > 0 ? "+" : (eloDelta < 0 ? "" : "±");
+    const eloColor = eloDelta > 0 ? "elo-pos" : (eloDelta < 0 ? "elo-neg" : "elo-zero");
+
+    return `
+      <li class="rankings-bar-item">
+        <span class="rankings-bar-rank">#${i + 1}</span>
+        <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
+             onerror="this.onerror=null; this.style.visibility='hidden';">
+        <div class="rankings-bar-info">
+          <div class="rankings-bar-name-row">
+            <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
+            <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
+            <!-- record moved out of name-row into its own grid column below -->
+          </div>
+          <div class="rankings-bar-track">
+            <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
+          </div>
+        </div>
+        <!-- NEW own-column record + rating -->
         <span class="rankings-bar-record">
           ${cs.wins}–${cs.losses}<span class="more-data-percent ${winPct >= 50 ? "win-pos" : "win-neg"}"> (${winPct}%)</span>
         </span>
-      </div>
-      <div class="rankings-bar-track">
-        <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
-      </div>
-    </div>
-    <span class="rankings-bar-rating">
-      ${Math.round(cs.rating)}<span class="more-data-elo ${eloColor}">${eloSign}${eloDelta}</span>
-    </span>
-    ${description ? `<div class="rankings-tooltip">${description}</div>` : ""}
-  </li>`;
-}).join("");
+        <span class="rankings-bar-rating">
+          ${Math.round(cs.rating)}<span class="more-data-elo ${eloColor}">(${eloSign}${eloDelta})</span>
+        </span>
+        ${description ? `<div class="rankings-tooltip">${description}</div>` : ""}
+      </li>`;
+  }).join("");
 
   list.querySelectorAll(".rankings-bar-item").forEach((item) => {
   const tooltip = item.querySelector(".rankings-tooltip");
   if (!tooltip) return;
-  // NEW: flip-down detection when the tooltip would clip above
+  // flip-down detection (unchanged)
   item.addEventListener("mouseenter", () => {
     const itemRect = item.getBoundingClientRect();
-    const listRect = list.getBoundingClientRect();
+    const listRect  = list.getBoundingClientRect();
     const tooltipHeight = tooltip.offsetHeight || 100;
     const spaceAbove = itemRect.top - listRect.top;
     const spaceBelow = listRect.bottom - itemRect.bottom;
@@ -377,6 +386,24 @@ function showRankings() {
       tooltip.classList.remove("flip-down");
     }
   });
+  // click toggles pinned state, no device check needed
+  item.addEventListener("click", () => {
+    const wasOpen = item.classList.contains("tooltip-pinned");
+    list.querySelectorAll(".rankings-bar-item.tooltip-pinned").forEach((i) => {
+      if (i !== item) i.classList.remove("tooltip-pinned");
+    });
+    if (!wasOpen) item.classList.add("tooltip-pinned");
+  });
+});
+
+// Click outside any row closes all pinned tooltips
+$("rankings-modal").addEventListener("click", (e) => {
+  if (e.target.id === "rankings-modal") { closeRankings(); return; }
+  if (!e.target.closest(".rankings-bar-item")) {
+    list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
+        .forEach((i) => i.classList.remove("tooltip-pinned"));
+  }
+});
   // NEW: click toggles the tooltip on touch-primary devices
   item.addEventListener("click", () => {
     if (!window.matchMedia("(hover: none)").matches) return;
