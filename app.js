@@ -373,10 +373,10 @@ list.innerHTML =
   list.querySelectorAll(".rankings-bar-item").forEach((item) => {
   const tooltip = item.querySelector(".rankings-tooltip");
   if (!tooltip) return;
-  // flip-down detection (unchanged)
+  // NEW: flip-down detection when the tooltip would clip above
   item.addEventListener("mouseenter", () => {
     const itemRect = item.getBoundingClientRect();
-    const listRect  = list.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
     const tooltipHeight = tooltip.offsetHeight || 100;
     const spaceAbove = itemRect.top - listRect.top;
     const spaceBelow = listRect.bottom - itemRect.bottom;
@@ -386,24 +386,6 @@ list.innerHTML =
       tooltip.classList.remove("flip-down");
     }
   });
-  // click toggles pinned state, no device check needed
-  item.addEventListener("click", () => {
-    const wasOpen = item.classList.contains("tooltip-pinned");
-    list.querySelectorAll(".rankings-bar-item.tooltip-pinned").forEach((i) => {
-      if (i !== item) i.classList.remove("tooltip-pinned");
-    });
-    if (!wasOpen) item.classList.add("tooltip-pinned");
-  });
-});
-
-// Click outside any row closes all pinned tooltips
-$("rankings-modal").addEventListener("click", (e) => {
-  if (e.target.id === "rankings-modal") { closeRankings(); return; }
-  if (!e.target.closest(".rankings-bar-item")) {
-    list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
-        .forEach((i) => i.classList.remove("tooltip-pinned"));
-  }
-});
   // NEW: click toggles the tooltip on touch-primary devices
   item.addEventListener("click", () => {
     if (!window.matchMedia("(hover: none)").matches) return;
@@ -413,6 +395,16 @@ $("rankings-modal").addEventListener("click", (e) => {
     });
     if (!wasOpen) item.classList.add("tooltip-pinned");
   });
+});
+
+// NEW: clicking outside any row closes all pinned tooltips
+$("rankings-modal").addEventListener("click", (e) => {
+  if (e.target.id === "rankings-modal") { closeRankings(); return; }
+  if (!e.target.closest(".rankings-bar-item") &&
+      window.matchMedia("(hover: none)").matches) {
+    list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
+        .forEach((i) => i.classList.remove("tooltip-pinned"));
+  }
 });
 
 // NEW: clicking outside any row closes all pinned tooltips

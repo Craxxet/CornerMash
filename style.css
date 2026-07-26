@@ -434,6 +434,16 @@ body {
   flex: 1;
 }
 
+.rankings-bar-item {
+  display: grid;
+  grid-template-columns: 32px 48px 1fr 72px;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--transition);
+}
+
 .rankings-bar-item:hover {
   background: rgba(255,255,255,0.03);
 }
