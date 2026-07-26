@@ -8,6 +8,7 @@ const RESOURCE_ICONS = {
   "Barrels": "Barrels.png",
   "Berries": "Berries.png",
   "Biscuits": "Biscuits.png",
+  "biscuits": "Biscuits.png",
   "Clay": "Clay.png",
   "Coal": "Coal.png",
   "Copper Ore": "Copper Ore.png",
@@ -33,7 +34,7 @@ const RESOURCE_ICONS = {
   "Planks": "Planks.png",
   "Plant Fiber": "Plant Fiber.png",
   "Porridge": "Porridge.png",
-  "Provisions": "Provisions.png",
+  "Pack of Provisions": "Provisions.png",
   "Reed": "Reed.png",
   "Resin": "Resin.png",
   "Root": "Root.png",
@@ -42,7 +43,7 @@ const RESOURCE_ICONS = {
   "Tools": "Tools.png",
   "Skewers": "Skewers.png",
   "Stone": "Stone.png",
-  "Trade Goods": "Trade Goods.png",
+  "trade goods": "Trade Goods.png",
   "Training Gear": "Training Gear.png",
   "Vegetables": "Vegetables.png",
   "Waterskins": "Waterskins.png",
@@ -296,6 +297,20 @@ async function vote(winnerIdx) {
   state.isAnimating = false;
 }
 
+async function skipVote() {
+  if (state.isAnimating) return;
+  state.isAnimating = true;
+  // Brief visual feedback before the new pair appears
+  $("cs-a").classList.add("rejected");
+  $("cs-b").classList.add("rejected");
+  await wait(180);
+  $("cs-a").classList.remove("rejected");
+  $("cs-b").classList.remove("rejected");
+  showNewMatchup();
+  state.isAnimating = false;
+}
+$("skip-btn").addEventListener("click", skipVote);
+
 // ---------- Rankings modal ----------
 function showRankings() {
   const list = $("rankings-list");
@@ -317,42 +332,71 @@ function showRankings() {
   const rClass = rarityClass(rarity);
   const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/')); // use the thumbnail version of the image for the rankings list
   const description = formatDescription(cs.description || "");
+  const total = cs.wins + cs.losses;
+  const winPct = total > 0 ? Math.round((cs.wins / total) * 100) : 0;
+  const eloDelta = Math.round(cs.rating - cs.initialRating);
+  const eloSign = eloDelta > 0 ? "+" : (eloDelta < 0 ? "" : "±");
+  const eloColor = eloDelta > 0 ? "elo-pos" : (eloDelta < 0 ? "elo-neg" : "elo-zero");
   return `
-    <li class="rankings-bar-item">
-      <span class="rankings-bar-rank">#${i + 1}</span>
-      <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
-           onerror="this.onerror=null; this.style.visibility='hidden';">
-      <div class="rankings-bar-info">
-        <div class="rankings-bar-name-row">
-          <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
-          <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
-          <span class="rankings-bar-record">${cs.wins}–${cs.losses}</span>
-        </div>
-        <div class="rankings-bar-track">
-          <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
-        </div>
+  <li class="rankings-bar-item">
+    <span class="rankings-bar-rank">#${i + 1}</span>
+    <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
+         onerror="this.onerror=null; this.style.visibility='hidden';">
+    <div class="rankings-bar-info">
+      <div class="rankings-bar-name-row">
+        <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
+        <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
+        <span class="rankings-bar-record">
+          ${cs.wins}–${cs.losses}<span class="more-data-percent ${winPct >= 50 ? "win-pos" : "win-neg"}"> (${winPct}%)</span>
+        </span>
       </div>
-      <span class="rankings-bar-rating">${Math.round(cs.rating)}</span>
-      ${description ? `<div class="rankings-tooltip">${description}</div>` : ''}
-    </li>`;
+      <div class="rankings-bar-track">
+        <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
+      </div>
+    </div>
+    <span class="rankings-bar-rating">
+      ${Math.round(cs.rating)}<span class="more-data-elo ${eloColor}">${eloSign}${eloDelta}</span>
+    </span>
+    ${description ? `<div class="rankings-tooltip">${description}</div>` : ""}
+  </li>`;
 }).join("");
 
   list.querySelectorAll(".rankings-bar-item").forEach((item) => {
-    const tooltip = item.querySelector(".rankings-tooltip");
-    if (!tooltip) return;
-    item.addEventListener("mouseenter", () => {
-      const itemRect = item.getBoundingClientRect();
-      const listRect = list.getBoundingClientRect();
-      const tooltipHeight = tooltip.offsetHeight || 100;
-      const spaceAbove = itemRect.top - listRect.top;
-      const spaceBelow = listRect.bottom - itemRect.bottom;
-      if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
-        tooltip.classList.add("flip-down");
-      } else {
-        tooltip.classList.remove("flip-down");
-      }
-    });
+  const tooltip = item.querySelector(".rankings-tooltip");
+  if (!tooltip) return;
+  // NEW: flip-down detection when the tooltip would clip above
+  item.addEventListener("mouseenter", () => {
+    const itemRect = item.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    const tooltipHeight = tooltip.offsetHeight || 100;
+    const spaceAbove = itemRect.top - listRect.top;
+    const spaceBelow = listRect.bottom - itemRect.bottom;
+    if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
+      tooltip.classList.add("flip-down");
+    } else {
+      tooltip.classList.remove("flip-down");
+    }
   });
+  // NEW: click toggles the tooltip on touch-primary devices
+  item.addEventListener("click", () => {
+    if (!window.matchMedia("(hover: none)").matches) return;
+    const wasOpen = item.classList.contains("tooltip-pinned");
+    list.querySelectorAll(".rankings-bar-item.tooltip-pinned").forEach((i) => {
+      if (i !== item) i.classList.remove("tooltip-pinned");
+    });
+    if (!wasOpen) item.classList.add("tooltip-pinned");
+  });
+});
+
+// NEW: clicking outside any row closes all pinned tooltips
+$("rankings-modal").addEventListener("click", (e) => {
+  if (e.target.id === "rankings-modal") { closeRankings(); return; }
+  if (!e.target.closest(".rankings-bar-item") &&
+      window.matchMedia("(hover: none)").matches) {
+    list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
+        .forEach((i) => i.classList.remove("tooltip-pinned"));
+  }
+});
 
   $("rankings-modal").hidden = false;
 }
@@ -368,12 +412,21 @@ $("rankings-modal").addEventListener("click", (e) => {
   if (e.target.id === "rankings-modal") closeRankings();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeRankings();
+  if (e.key === "Escape") {
+    closeRankings();
+    return;
+  }
+  // NEW: while the rankings modal is open, only Escape is honored
+  if (!$("rankings-modal").hidden) return;
   if (e.key === "ArrowLeft")  vote(0);
   if (e.key === "ArrowRight") vote(1);
+});
+
+$("more-data-toggle").addEventListener("change", (e) => {
+  document.body.classList.toggle("show-more-data", e.target.checked);
 });
 
 init();
 
 // TEMPORARY: uncomment to preview the progress bar
- updateVoteProgress(4624);
+// updateVoteProgress(4624);

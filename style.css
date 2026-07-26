@@ -522,15 +522,18 @@ body {
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 720px) {
-  .matchup { grid-template-columns: 1fr; }
-  .vs { padding: 4px 0; font-size: 1rem; }
-  .cs-card { min-height: 0; }
-  .controls { justify-content: center; }
-  .stats { align-items: stretch; width: 100%; min-width: 0; }
-  .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
-  .rankings-bar-icon { width: 36px; height: 36px; }
-  .rankings-bar-record { display: none; }
+@media (max-width: 720px), (hover: none) {
+  /* Make the cornerstone name readable on phone vertical */
+  .rankings-bar-rarity { display: none; }
+  /* Keep the W-L record visible now that rarity is hidden */
+  .rankings-bar-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;  /* take remaining space; record pushes right */
+  }
+  .rankings-bar-record { /* was hidden here; now always shown */ }
 }
 
 .rankings-bar-item {
@@ -594,4 +597,92 @@ body {
 
 .rankings-bar-item:hover .rankings-tooltip.flip-down {
   transform: translateX(-50%) translateY(0);
+}
+
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+  transform: translateX(-50%) translateY(0);
+}
+
+.skip-btn {
+  background: #b53650;        /* reddish-pinkish */
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: filter var(--transition), transform var(--transition);
+}
+
+.skip-btn:hover { filter: brightness(1.1); transform: translateY(-1px);
+}
+
+/* More Data toggle (header) */
+.more-data-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 auto 0 12px;       /* centered between title and close btn */
+  letter-spacing: 0.3px;
+}
+.more-data-toggle:hover { color: var(--text); }
+
+.more-data-toggle input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  position: relative;
+  width: 32px; height: 18px;
+  background: rgba(255,255,255,0.18);
+  border: none; border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 0; padding: 0;
+  flex-shrink: 0;
+}
+.more-data-toggle input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  background: white; border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform 0.2s ease;
+}
+.more-data-toggle input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+.more-data-toggle input[type="checkbox"]:checked::before {
+  transform: translateX(14px);
+}
+
+/* More Data spans (hidden by default, shown when body has the class) */
+.more-data-percent,
+.more-data-elo {
+  display: none;
+  margin-left: 4px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+body.show-more-data .more-data-percent { display: inline; }
+body.show-more-data .more-data-elo     { display: inline; }
+body.show-more-data .win-pos { color: var(--good); }
+body.show-more-data .win-neg { color: var(--bad); }
+body.show-more-data .elo-pos { color: var(--good); }
+body.show-more-data .elo-neg { color: var(--bad); }
+body.show-more-data .elo-zero { color: var(--text-dim); }
+
+/* Tighten the header on small phones so the toggle doesn't wrap awkwardly */
+@media (max-width: 480px) {
+  .modal-header { flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+  .modal-header h2 { font-size: 1.05rem; margin-right: auto; }
+  .more-data-toggle { margin: 0; font-size: 0.78rem; }
 }
