@@ -115,6 +115,7 @@ body {
   align-items: stretch;
 }
 
+@media (max-width: 720px) {
 .cs-card {
   position: relative;
   display: flex;
@@ -136,6 +137,9 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   min-height: 420px;
+  width: 90%;
+  max-width: none;
+  }
 }
 
 .cs-card::before {
@@ -434,16 +438,6 @@ body {
   flex: 1;
 }
 
-.rankings-bar-item {
-  display: grid;
-  grid-template-columns: 32px 48px 1fr 72px;
-  gap: 14px;
-  align-items: center;
-  padding: 8px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background var(--transition);
-}
-
 .rankings-bar-item:hover {
   background: rgba(255,255,255,0.03);
 }
@@ -536,7 +530,6 @@ body {
     min-width: 0;
     flex: 1;  /* take remaining space; record pushes right */
   }
-  .rankings-bar-record { /* was hidden here; now always shown */ }
 }
 
 .rankings-bar-item {
@@ -684,7 +677,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .more-data-percent { margin-left: 4px; }   /* the comma " " gives natural spacing */
-.more-data-elo { /* no margin — the "(" provides the gap */ }
 body.show-more-data .more-data-percent { display: inline; }
 body.show-more-data .more-data-elo     { display: inline; }
 body.show-more-data .win-pos { color: var(--good); }

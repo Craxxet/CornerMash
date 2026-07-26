@@ -336,7 +336,7 @@ list.innerHTML =
     const pct = Math.max(2, (cs.rating / maxRating) * 100);
     const rarity = cs.rarity || "N/A";
     const rClass = rarityClass(rarity);
-    const iconSrc = encodeURI(cs.image || "");      /* Previously const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/')); */
+    const iconSrc = encodeURI(cs.image.replace('/cs/', '/cs-thumbs/'));
     const description = formatDescription(cs.description || "");
     const total = cs.wins + cs.losses;
     const winPct  = total > 0 ? Math.round((cs.wins / total) * 100) : 0;
@@ -373,7 +373,8 @@ list.innerHTML =
   list.querySelectorAll(".rankings-bar-item").forEach((item) => {
   const tooltip = item.querySelector(".rankings-tooltip");
   if (!tooltip) return;
-  // NEW: flip-down detection when the tooltip would clip above
+
+  // Flip-down detection (unchanged)
   item.addEventListener("mouseenter", () => {
     const itemRect = item.getBoundingClientRect();
     const listRect = list.getBoundingClientRect();
@@ -386,32 +387,24 @@ list.innerHTML =
       tooltip.classList.remove("flip-down");
     }
   });
-  // NEW: click toggles the tooltip on touch-primary devices
+
+  // Tap-to-toggle: closes ALL pinned first, then re-pins only if it
+  // wasn't pinned before. Guarantees only one tooltip open at a time.
   item.addEventListener("click", () => {
-    if (!window.matchMedia("(hover: none)").matches) return;
     const wasOpen = item.classList.contains("tooltip-pinned");
     list.querySelectorAll(".rankings-bar-item.tooltip-pinned").forEach((i) => {
-      if (i !== item) i.classList.remove("tooltip-pinned");
+      i.classList.remove("tooltip-pinned");
     });
-    if (!wasOpen) item.classList.add("tooltip-pinned");
+    if (!wasOpen) {
+      item.classList.add("tooltip-pinned");
+    }
   });
 });
 
-// NEW: clicking outside any row closes all pinned tooltips
+// Click outside any row closes all pinned (unchanged, but now safe)
 $("rankings-modal").addEventListener("click", (e) => {
   if (e.target.id === "rankings-modal") { closeRankings(); return; }
-  if (!e.target.closest(".rankings-bar-item") &&
-      window.matchMedia("(hover: none)").matches) {
-    list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
-        .forEach((i) => i.classList.remove("tooltip-pinned"));
-  }
-});
-
-// NEW: clicking outside any row closes all pinned tooltips
-$("rankings-modal").addEventListener("click", (e) => {
-  if (e.target.id === "rankings-modal") { closeRankings(); return; }
-  if (!e.target.closest(".rankings-bar-item") &&
-      window.matchMedia("(hover: none)").matches) {
+  if (!e.target.closest(".rankings-bar-item")) {
     list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
         .forEach((i) => i.classList.remove("tooltip-pinned"));
   }
