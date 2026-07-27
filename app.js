@@ -450,6 +450,10 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") vote(1);
 });
 
+$("more-data-toggle").addEventListener("change", (e) => {
+  document.body.classList.toggle("show-more-data", e.target.checked);
+});
+
 init();
 
 // TEMPORARY: uncomment to preview the progress bar
