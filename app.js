@@ -370,36 +370,39 @@ list.innerHTML =
       </li>`;
   }).join("");
 
-  list.querySelectorAll(".rankings-bar-item").forEach((item) => {
-  const tooltip = item.querySelector(".rankings-tooltip");
-  if (!tooltip) return;
+list.querySelectorAll(".rankings-bar-item").forEach((item) => {
+    const tooltip = item.querySelector(".rankings-tooltip");
+    if (!tooltip) return;
 
-  // Flip-down detection (unchanged)
-  item.addEventListener("mouseenter", () => {
-    const itemRect = item.getBoundingClientRect();
-    const listRect = list.getBoundingClientRect();
-    const tooltipHeight = tooltip.offsetHeight || 100;
-    const spaceAbove = itemRect.top - listRect.top;
-    const spaceBelow = listRect.bottom - itemRect.bottom;
-    if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
-      tooltip.classList.add("flip-down");
-    } else {
-      tooltip.classList.remove("flip-down");
-    }
-  });
-
-  // Tap-to-toggle: closes ALL pinned first, then re-pins only if it
-  // wasn't pinned before. Guarantees only one tooltip open at a time.
-  item.addEventListener("click", () => {
-    const wasOpen = item.classList.contains("tooltip-pinned");
-    list.querySelectorAll(".rankings-bar-item.tooltip-pinned").forEach((i) => {
-      i.classList.remove("tooltip-pinned");
+    // Flip-down detection (unchanged)
+    item.addEventListener("mouseenter", () => {
+        const itemRect = item.getBoundingClientRect();
+        const listRect = list.getBoundingClientRect();
+        const tooltipHeight = tooltip.offsetHeight || 100;
+        const spaceAbove = itemRect.top - listRect.top;
+        const spaceBelow = listRect.bottom - itemRect.bottom;
+        if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
+            tooltip.classList.add("flip-down");
+        } else {
+            tooltip.classList.remove("flip-down");
+        }
     });
-    if (!wasOpen) {
-      item.classList.add("tooltip-pinned");
-    }
-  });
+
+    // Tap-to-toggle (touch only). Close any pinned tooltip first so
+    // only one is ever open at a time, then re-pin this one unless
+    // it was already pinned (= user tapped it again to close).
+    item.addEventListener("click", () => {
+        if (!window.matchMedia("(hover: none)").matches) return;
+        const wasOpen = item.classList.contains("tooltip-pinned");
+        list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
+            .forEach((i) => i.classList.remove("tooltip-pinned"));
+        if (!wasOpen) item.classList.add("tooltip-pinned");
+    });
 });
+
+// Scroll closes any open pinned tooltip (touch only).
+// Attached once via the wire-up section below, NOT here, so it doesn't
+// accumulate over multiple showRankings() calls.
 
 // Click outside any row closes all pinned (unchanged, but now safe)
 $("rankings-modal").addEventListener("click", (e) => {
@@ -420,22 +423,31 @@ $("cs-a").addEventListener("click", () => vote(0));
 $("cs-b").addEventListener("click", () => vote(1));
 $("rankings-btn").addEventListener("click", showRankings);
 $("close-modal").addEventListener("click", closeRankings);
+
 $("rankings-modal").addEventListener("click", (e) => {
-  if (e.target.id === "rankings-modal") closeRankings();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeRankings();
-    return;
-  }
-  // NEW: while the rankings modal is open, only Escape is honored
-  if (!$("rankings-modal").hidden) return;
-  if (e.key === "ArrowLeft")  vote(0);
-  if (e.key === "ArrowRight") vote(1);
+    if (e.target.id === "rankings-modal") { closeRankings(); return; }
+    if (!e.target.closest(".rankings-bar-item") &&
+        window.matchMedia("(hover: none)").matches) {
+        $("rankings-list")
+            .querySelectorAll(".rankings-bar-item.tooltip-pinned")
+            .forEach((i) => i.classList.remove("tooltip-pinned"));
+    }
 });
 
-$("more-data-toggle").addEventListener("change", (e) => {
-  document.body.classList.toggle("show-more-data", e.target.checked);
+// Scrolling the list closes any open pinned tooltip. Attached once
+// (not inside showRankings) so it doesn't accumulate across modal
+// open/close cycles.
+$("rankings-list").addEventListener("scroll", () => {
+    if (!window.matchMedia("(hover: none)").matches) return;
+    $("rankings-list")
+        .querySelectorAll(".rankings-bar-item.tooltip-pinned")
+        .forEach((i) => i.classList.remove("tooltip-pinned"));
+}, { passive: true });
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeRankings();
+    if (e.key === "ArrowLeft") vote(0);
+    if (e.key === "ArrowRight") vote(1);
 });
 
 init();

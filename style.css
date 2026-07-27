@@ -542,15 +542,36 @@ body {
 }
 
 @media (max-width: 720px) {
-  .rankings-bar-item {
-    grid-template-columns: 24px 36px 1fr auto 60px;  /* was: 24px 36px 1fr 56px */
-    gap: 8px;
-    padding: 8px 12px;
-  }
-  .cs-card {
-    width: 90%;
-    max-width: none;
-  }
+    .matchup {
+        grid-template-columns: 1fr;
+        justify-items: center;   /* NEW: center the stacked cards */
+    }
+    .vs { padding: 4px 0; font-size: 1rem; }
+    .cs-card {
+        min-height: 0;
+        width: 100%;
+        max-width: 320px;        /* NEW: cap card width */
+        aspect-ratio: 1 / 1;     /* NEW: force square cards */
+        padding: 14px;           /* NEW: tighter padding inside the card */
+    }
+    .cs-image-wrap {
+        width: 65%;              /* was 60% — slightly larger icon */
+        margin-bottom: 10px;     /* was 14px — tighter */
+    }
+    .cs-info h2 { font-size: 1rem; line-height: 1.2; }    /* NEW */
+    .cs-info p {                                          /* NEW: clamp desc */
+        font-size: 0.82rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .controls { justify-content: center; }
+    .stats { align-items: stretch; width: 100%; min-width: 0; }
+    .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
+    .rankings-bar-icon { width: 36px; height: 36px; }
+    .rankings-bar-record { display: none; }
 }
 
 
@@ -737,3 +758,25 @@ body.show-more-data .elo-zero { color: var(--text-dim); }
 /* Tighter touch on the more-data spans now that Win% is inside ( 58% )
    so the leading " (" blends in and we don't need extra margin */
 .more-data-percent { margin-left: 0; }
+
+/* Pinned tooltip state — used on touch devices where :hover is sticky.
+   Specificity (0,3,0) is enough to override the hover rule (0,2,1). */
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* On touch-primary devices, ONLY .tooltip-pinned shows the tooltip.
+   Suppressing :hover-triggered tooltips prevents two from being open
+   at once when sticky hover persists across taps. */
+@media (hover: none) {
+    .rankings-bar-item:hover .rankings-tooltip,
+    .rankings-bar-item:hover .rankings-tooltip.flip-down {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
