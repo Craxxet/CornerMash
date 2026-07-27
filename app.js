@@ -388,11 +388,11 @@ list.querySelectorAll(".rankings-bar-item").forEach((item) => {
         }
     });
 
-    // Tap-to-toggle (touch only). Close any pinned tooltip first so
-    // only one is ever open at a time, then re-pin this one unless
-    // it was already pinned (= user tapped it again to close).
+    // Tap-to-toggle — ALWAYS runs. On desktop this stacks with the
+    // existing :hover behavior (click also pins); on touch (where
+    // :hover may not fire at all on Samsung Internet and similar
+    // browsers) it's the only way to see the tooltip.
     item.addEventListener("click", () => {
-        if (!window.matchMedia("(hover: none)").matches) return;
         const wasOpen = item.classList.contains("tooltip-pinned");
         list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
             .forEach((i) => i.classList.remove("tooltip-pinned"));

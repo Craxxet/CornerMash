@@ -571,7 +571,6 @@ body {
     .stats { align-items: stretch; width: 100%; min-width: 0; }
     .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
     .rankings-bar-icon { width: 36px; height: 36px; }
-    .rankings-bar-record { display: none; }
 }
 
 
@@ -604,6 +603,31 @@ body {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Pinned tooltip — toggled by JS on click. Same specificity as the
+   :hover rule (0,3,0); source order keeps this one winning when both
+   selectors match. */
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+    bottom: auto;
+    top: calc(100% + 10px);
+}
+
+/* Disable :hover-triggered tooltips on touch-primary devices to
+   prevent sticky hover from keeping tooltips open. The OR
+   combination catches Samsung Internet and other browsers that
+   report (pointer: coarse) but not (hover: none), and vice versa. */
+@media (hover: none), (pointer: coarse) {
+    .rankings-bar-item:hover .rankings-tooltip,
+    .rankings-bar-item:hover .rankings-tooltip.flip-down {
+        opacity: 0;
+        visibility: hidden;
+    }
 }
 
 .vote-progress-marker.milestone-late {
