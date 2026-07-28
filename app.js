@@ -344,61 +344,54 @@ list.innerHTML =
     const eloSign  = eloDelta > 0 ? "+" : (eloDelta < 0 ? "" : "±");
     const eloColor = eloDelta > 0 ? "elo-pos" : (eloDelta < 0 ? "elo-neg" : "elo-zero");
 
-    return `
-      <li class="rankings-bar-item">
-        <span class="rankings-bar-rank">#${i + 1}</span>
-        <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
-             onerror="this.onerror=null; this.style.visibility='hidden';">
-        <div class="rankings-bar-info">
-          <div class="rankings-bar-name-row">
-            <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
-            <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
-            <!-- record moved out of name-row into its own grid column below -->
-          </div>
-          <div class="rankings-bar-track">
-            <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
-          </div>
+      return `
+    <li class="rankings-bar-item" tabindex="0" role="button" aria-expanded="false">
+      <span class="rankings-bar-rank">#${i + 1}</span>
+      <img class="rankings-bar-icon" src="${iconSrc}" alt="" loading="lazy"
+           onerror="this.onerror=null; this.style.visibility='hidden';">
+      <div class="rankings-bar-info">
+        <div class="rankings-bar-name-row">
+          <span class="rankings-bar-name">${escapeHtml(cs.name)}</span>
+          <span class="rankings-bar-rarity ${rClass}">${escapeHtml(rarity)}</span>
+          <span class="rankings-bar-record">
+            ${cs.wins}–${cs.losses}<span class="more-data-percent ${winPct >= 50 ? "win-pos" : "win-neg"}"> (${winPct}%)</span>
+          </span>
         </div>
-        <!-- NEW own-column record + rating -->
-        <span class="rankings-bar-record">
-          ${cs.wins}–${cs.losses}<span class="more-data-percent ${winPct >= 50 ? "win-pos" : "win-neg"}"> (${winPct}%)</span>
-        </span>
-        <span class="rankings-bar-rating">
-          ${Math.round(cs.rating)}<span class="more-data-elo ${eloColor}">(${eloSign}${eloDelta})</span>
-        </span>
-        ${description ? `<div class="rankings-tooltip">${description}</div>` : ""}
-      </li>`;
+        <div class="rankings-bar-track">
+          <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
+        </div>
+      </div>
+      <span class="rankings-bar-rating">
+        ${Math.round(cs.rating)}<span class="more-data-elo ${eloColor}">${eloSign}${eloDelta}</span>
+      </span>
+      ${description ? `
+        <div class="rankings-bar-description">
+          ${description}
+        </div>
+      ` : ""}
+    </li>`;
   }).join("");
 
-list.querySelectorAll(".rankings-bar-item").forEach((item) => {
-    const tooltip = item.querySelector(".rankings-tooltip");
-    if (!tooltip) return;
+  // Click (or keyboard Enter/Space) toggles the description row.
+  // Only one row stays expanded at a time; tapping the same row
+  // again closes it; tapping another row switches to that one.
+  function toggleRow(item) {
+    const wasOpen = item.classList.contains("expanded");
+    list.querySelectorAll(".rankings-bar-item.expanded")
+        .forEach((i) => { if (i !== item) i.classList.remove("expanded"); });
+    item.classList.toggle("expanded");
+    item.setAttribute("aria-expanded", String(!wasOpen));
+  }
 
-    // Flip-down detection (unchanged)
-    item.addEventListener("mouseenter", () => {
-        const itemRect = item.getBoundingClientRect();
-        const listRect = list.getBoundingClientRect();
-        const tooltipHeight = tooltip.offsetHeight || 100;
-        const spaceAbove = itemRect.top - listRect.top;
-        const spaceBelow = listRect.bottom - itemRect.bottom;
-        if (spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
-            tooltip.classList.add("flip-down");
-        } else {
-            tooltip.classList.remove("flip-down");
-        }
+  list.querySelectorAll(".rankings-bar-item").forEach((item) => {
+    item.addEventListener("click", () => toggleRow(item));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleRow(item);
+      }
     });
-
-    // Tap-to-toggle — ALWAYS runs. On desktop this stacks with the
-    // existing :hover behavior (click also pins); on touch (where
-    // :hover may not fire at all on Samsung Internet and similar
-    // browsers) it's the only way to see the tooltip.
-    item.addEventListener("click", () => {
-        const wasOpen = item.classList.contains("tooltip-pinned");
-        list.querySelectorAll(".rankings-bar-item.tooltip-pinned")
-            .forEach((i) => i.classList.remove("tooltip-pinned"));
-        if (!wasOpen) item.classList.add("tooltip-pinned");
-    });
-});
+  });
 
 // Scroll closes any open pinned tooltip (touch only).
 // Attached once via the wire-up section below, NOT here, so it doesn't
@@ -424,21 +417,21 @@ $("cs-b").addEventListener("click", () => vote(1));
 $("rankings-btn").addEventListener("click", showRankings);
 $("close-modal").addEventListener("click", closeRankings);
 
-$("rankings-modal").addEventListener("click", (e) => {
-    if (e.target.id === "rankings-modal") { closeRankings(); return; }
-    if (!e.target.closest(".rankings-bar-item") &&
-        window.matchMedia("(hover: none)").matches) {
-        $("rankings-list")
-            .querySelectorAll(".rankings-bar-item.tooltip-pinned")
-            .forEach((i) => i.classList.remove("tooltip-pinned"));
-    }
+// More Data toggle — preserved
+$("more-data-toggle").addEventListener("change", (e) => {
+    document.body.classList.toggle("show-more-data", e.target.checked);
 });
 
-// Scrolling the list closes any open pinned tooltip. Attached once
-// (not inside showRankings) so it doesn't accumulate across modal
-// open/close cycles.
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeRankings();
+    if (e.key === "ArrowLeft") vote(0);
+    if (e.key === "ArrowRight") vote(1);
+});
+
+// Scroll closes any pinned tooltip — runs unconditionally.
+// On desktop, hover will re-show the tooltip as the user scrolls
+// back over a row, so this is non-disruptive.
 $("rankings-list").addEventListener("scroll", () => {
-    if (!window.matchMedia("(hover: none)").matches) return;
     $("rankings-list")
         .querySelectorAll(".rankings-bar-item.tooltip-pinned")
         .forEach((i) => i.classList.remove("tooltip-pinned"));
@@ -448,10 +441,6 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeRankings();
     if (e.key === "ArrowLeft") vote(0);
     if (e.key === "ArrowRight") vote(1);
-});
-
-$("more-data-toggle").addEventListener("change", (e) => {
-  document.body.classList.toggle("show-more-data", e.target.checked);
 });
 
 init();

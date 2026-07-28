@@ -542,35 +542,40 @@ body {
 }
 
 @media (max-width: 720px) {
-    .matchup {
-        grid-template-columns: 1fr;
-        justify-items: center;   /* NEW: center the stacked cards */
-    }
+    .matchup { grid-template-columns: 1fr; }
     .vs { padding: 4px 0; font-size: 1rem; }
-    .cs-card {
-        min-height: 0;
-        width: 100%;
-        max-width: 320px;        /* NEW: cap card width */
-        aspect-ratio: 1 / 1;     /* NEW: force square cards */
-        padding: 14px;           /* NEW: tighter padding inside the card */
-    }
-    .cs-image-wrap {
-        width: 65%;              /* was 60% — slightly larger icon */
-        margin-bottom: 10px;     /* was 14px — tighter */
-    }
-    .cs-info h2 { font-size: 1rem; line-height: 1.2; }    /* NEW */
-    .cs-info p {                                          /* NEW: clamp desc */
-        font-size: 0.82rem;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+    .cs-card { min-height: 0; }
     .controls { justify-content: center; }
     .stats { align-items: stretch; width: 100%; min-width: 0; }
-    .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
+
+    /* Rating cell widened to actually fit "1500" and the optional
+       "+50" / "-23" without overflowing leftward into the icon
+       column. minmax(0, 1fr) lets the info column shrink to its
+       real min-content instead of being forced wider by name text. */
+    .rankings-bar-item {
+        grid-template-columns: 24px 36px minmax(0, 1fr) 78px;
+        gap: 8px;
+        padding: 8px 12px;
+    }
     .rankings-bar-icon { width: 36px; height: 36px; }
+
+    /* The .rankings-bar-record { display: none; } line is REMOVED
+       so the W/L record shows on mobile. */
+
+    /* Keep the rating on a single visual line. */
+    .rankings-bar-rating {
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    /* Truncate long names with ellipsis instead of pushing the
+       rarity / record / rating columns. */
+    .rankings-bar-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 
@@ -803,4 +808,24 @@ body.show-more-data .elo-zero { color: var(--text-dim); }
         opacity: 0;
         visibility: hidden;
     }
+}
+
+/* Inline expandable description — replaces the floating tooltip. */
+.rankings-bar-description {
+    grid-column: 1 / -1;            /* span all 4 row columns */
+    display: none;
+    padding: 12px 4px 6px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: left;
+}
+.rankings-bar-item.expanded .rankings-bar-description {
+    display: block;
+}
+.rankings-bar-item { cursor: pointer; }
+.rankings-bar-item.expanded {
+    background: rgba(255, 255, 255, 0.04);
 }
