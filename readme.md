@@ -2,7 +2,7 @@
 
 # CornerMash
 
-A 1v1 head-to-head ranker for the annual Cornerstones from *Against the Storm*, deployed on Cloudflare Pages with persistent votes stored in Cloudflare KV.
+A 1v1 head-to-head ranker for the annual Cornerstones from *Against the Storm*, deployed on Cloudflare Pages with persistent votes stored in Cloudflare DO.
 
 Ratings are computed with the Bradley–Terry model (ELO-style incremental updates with $K = 24$, initial rating pre-seeded at  $1600, 1400, 1200, 1000, 800, 600, 400$ based on community surveys).
 ## File layout

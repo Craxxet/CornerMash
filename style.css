@@ -136,6 +136,8 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   min-height: 420px;
+  width: 90%;
+  max-width: none;
 }
 
 .cs-card::before {
@@ -290,8 +292,10 @@ body {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  min-width: 560px;
-  padding: 10px 14px 28px;        /* was 10px 14px 14px — extra 14px covers the labels */
+  /* min-width: 560px; */     
+  width: 100%;                
+  max-width: 560px;           
+  padding: 10px 14px 28px;
   background: rgba(8, 10, 14, 0.55);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
@@ -432,15 +436,6 @@ body {
   flex: 1;
 }
 
-.rankings-bar-item {
-  display: grid;
-  grid-template-columns: 32px 48px 1fr 72px;
-  gap: 14px;
-  align-items: center;
-  padding: 8px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background var(--transition);
-}
 .rankings-bar-item:hover {
   background: rgba(255,255,255,0.03);
 }
@@ -522,27 +517,67 @@ body {
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 720px) {
-  .matchup { grid-template-columns: 1fr; }
-  .vs { padding: 4px 0; font-size: 1rem; }
-  .cs-card { min-height: 0; }
-  .controls { justify-content: center; }
-  .stats { align-items: stretch; width: 100%; min-width: 0; }
-  .rankings-bar-item { grid-template-columns: 24px 36px 1fr 56px; gap: 8px; padding: 8px 12px; }
-  .rankings-bar-icon { width: 36px; height: 36px; }
-  .rankings-bar-record { display: none; }
+@media (max-width: 720px), (hover: none) {
+  /* Make the cornerstone name readable on phone vertical */
+  .rankings-bar-rarity { display: none; }
+  /* Keep the W-L record visible now that rarity is hidden */
+  .rankings-bar-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;  /* take remaining space; record pushes right */
+  }
 }
 
 .rankings-bar-item {
   display: grid;
-  grid-template-columns: 32px 48px 1fr 72px;
+  grid-template-columns: 32px 48px 1fr auto 80px;   /* was: 32px 48px 1fr 72px */
   gap: 14px;
   align-items: center;
   padding: 8px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   transition: background var(--transition);
-  position: relative;            /* NEW — anchor for the tooltip */
+  position: relative;
 }
+
+@media (max-width: 720px) {
+    .matchup { grid-template-columns: 1fr; }
+    .vs { padding: 4px 0; font-size: 1rem; }
+    .cs-card { min-height: 0; }
+    .controls { justify-content: center; }
+    .stats { align-items: stretch; width: 100%; min-width: 0; }
+
+    /* Rating cell widened to actually fit "1500" and the optional
+       "+50" / "-23" without overflowing leftward into the icon
+       column. minmax(0, 1fr) lets the info column shrink to its
+       real min-content instead of being forced wider by name text. */
+    .rankings-bar-item {
+        grid-template-columns: 24px 36px minmax(0, 1fr) 78px;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .rankings-bar-icon { width: 36px; height: 36px; }
+
+    /* The .rankings-bar-record { display: none; } line is REMOVED
+       so the W/L record shows on mobile. */
+
+    /* Keep the rating on a single visual line. */
+    .rankings-bar-rating {
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    /* Truncate long names with ellipsis instead of pushing the
+       rarity / record / rating columns. */
+    .rankings-bar-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 
 .rankings-tooltip {
   position: absolute;
@@ -575,6 +610,31 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
+/* Pinned tooltip — toggled by JS on click. Same specificity as the
+   :hover rule (0,3,0); source order keeps this one winning when both
+   selectors match. */
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+    bottom: auto;
+    top: calc(100% + 10px);
+}
+
+/* Disable :hover-triggered tooltips on touch-primary devices to
+   prevent sticky hover from keeping tooltips open. The OR
+   combination catches Samsung Internet and other browsers that
+   report (pointer: coarse) but not (hover: none), and vice versa. */
+@media (hover: none), (pointer: coarse) {
+    .rankings-bar-item:hover .rankings-tooltip,
+    .rankings-bar-item:hover .rankings-tooltip.flip-down {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
 .vote-progress-marker.milestone-late {
   display: none;
 }
@@ -594,4 +654,178 @@ body {
 
 .rankings-bar-item:hover .rankings-tooltip.flip-down {
   transform: translateX(-50%) translateY(0);
+}
+
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+  transform: translateX(-50%) translateY(0);
+}
+
+.skip-btn {
+  background: #b53650;        /* reddish-pinkish */
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: filter var(--transition), transform var(--transition);
+}
+
+.skip-btn:hover { filter: brightness(1.1); transform: translateY(-1px);
+}
+
+/* More Data toggle (header) */
+.more-data-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 auto 0 12px;       /* centered between title and close btn */
+  letter-spacing: 0.3px;
+}
+.more-data-toggle:hover { color: var(--text); }
+
+.more-data-toggle input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  position: relative;
+  width: 32px; height: 18px;
+  background: rgba(255,255,255,0.18);
+  border: none; border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 0; padding: 0;
+  flex-shrink: 0;
+}
+.more-data-toggle input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  background: white; border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform 0.2s ease;
+}
+.more-data-toggle input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+.more-data-toggle input[type="checkbox"]:checked::before {
+  transform: translateX(14px);
+}
+
+/* More Data spans (hidden by default, shown when body has the class) */
+.more-data-percent,
+.more-data-elo {
+  display: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.more-data-percent { margin-left: 4px; }   /* the comma " " gives natural spacing */
+body.show-more-data .more-data-percent { display: inline; }
+body.show-more-data .more-data-elo     { display: inline; }
+body.show-more-data .win-pos { color: var(--good); }
+body.show-more-data .win-neg { color: var(--bad); }
+body.show-more-data .elo-pos { color: var(--good); }
+body.show-more-data .elo-neg { color: var(--bad); }
+body.show-more-data .elo-zero { color: var(--text-dim); }
+
+/* Tighten the header on small phones so the toggle doesn't wrap awkwardly */
+@media (max-width: 480px) {
+  .modal-header { flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+  .modal-header h2 { font-size: 1.05rem; margin-right: auto; }
+  .more-data-toggle { margin: 0; font-size: 0.78rem; }
+}
+
+/* Move the record out of the name-row flow into its own grid column.
+   Old rule had margin-left: auto; remove that since it's now a grid child. */
+.rankings-bar-record {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  justify-self: end;             /* right-align inside its own grid cell */
+}
+
+/* Header row that mirrors the data-row grid */
+.rankings-bar-header {
+  display: grid;
+  grid-template-columns: 32px 48px 1fr auto 80px;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 18px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--panel-border);
+  background: transparent;
+  pointer-events: none;
+}
+
+.rankings-bar-header-record,
+.rankings-bar-header-rating {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .rankings-bar-header {
+    grid-template-columns: 24px 36px 1fr auto 60px;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+}
+
+/* Tighter touch on the more-data spans now that Win% is inside ( 58% )
+   so the leading " (" blends in and we don't need extra margin */
+.more-data-percent { margin-left: 0; }
+
+/* Pinned tooltip state — used on touch devices where :hover is sticky.
+   Specificity (0,3,0) is enough to override the hover rule (0,2,1). */
+.rankings-bar-item.tooltip-pinned .rankings-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.rankings-bar-item.tooltip-pinned .rankings-tooltip.flip-down {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* On touch-primary devices, ONLY .tooltip-pinned shows the tooltip.
+   Suppressing :hover-triggered tooltips prevents two from being open
+   at once when sticky hover persists across taps. */
+@media (hover: none) {
+    .rankings-bar-item:hover .rankings-tooltip,
+    .rankings-bar-item:hover .rankings-tooltip.flip-down {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* Inline expandable description — replaces the floating tooltip. */
+.rankings-bar-description {
+    grid-column: 1 / -1;            /* span all 4 row columns */
+    display: none;
+    padding: 12px 4px 6px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: left;
+}
+.rankings-bar-item.expanded .rankings-bar-description {
+    display: block;
+}
+.rankings-bar-item { cursor: pointer; }
+.rankings-bar-item.expanded {
+    background: rgba(255, 255, 255, 0.04);
 }
