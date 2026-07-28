@@ -753,10 +753,10 @@ body.show-more-data .elo-zero { color: var(--text-dim); }
   justify-self: end;             /* right-align inside its own grid cell */
 }
 
-/* Header — must mirror the data row's grid exactly. */
+/* Header row that mirrors the data-row grid */
 .rankings-bar-header {
   display: grid;
-  grid-template-columns: 32px 48px 1fr 72px;   /* same as .rankings-bar-item */
+  grid-template-columns: 32px 48px 1fr auto 80px;
   gap: 14px;
   align-items: center;
   padding: 8px 18px;
@@ -770,23 +770,15 @@ body.show-more-data .elo-zero { color: var(--text-dim); }
   pointer-events: none;
 }
 
-/* Mirrors .rankings-bar-name-row so the WIN/LOSS label sits at the
-   right edge of the info column, exactly where the data row's
-   .rankings-bar-record ends up. */
-.rankings-bar-header-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-.rankings-bar-header-info .rankings-bar-header-record {
-  margin-left: auto;
-  flex-shrink: 0;
+.rankings-bar-header-record,
+.rankings-bar-header-rating {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 720px) {
   .rankings-bar-header {
-    grid-template-columns: 24px 36px 1fr 56px;   /* same as mobile .rankings-bar-item */
+    grid-template-columns: 24px 36px 1fr auto 60px;
     gap: 8px;
     padding: 8px 12px;
   }
