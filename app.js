@@ -358,7 +358,7 @@ list.innerHTML =
           </span>
         </div>
         <div class="rankings-bar-track">
-          <div class="rankings-bar-fill ${rClass}" style="width: ${pct.toFixed(1)}%"></div>
+          <div class="rankings-bar-fill ${rClass}"></div>
         </div>
       </div>
       <span class="rankings-bar-rating">
